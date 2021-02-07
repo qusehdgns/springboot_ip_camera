@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<meta charset="UTF-8">
+<title>RTSP</title>
+<script type="text/javascript" src="/js/jsmpeg.min.js"></script>
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+<link rel="stylesheet" th:href="@{/css/show_1.css}"></link>
+<link href="css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+	<div class="ip_stream">
+		<canvas class="ip_stream" id="video"></canvas>
+	</div>
+	<div class="control">
+		<div class="uppart">
+			<div class="part" id="ul" onclick="action(90);">
+				<div class="arrow1">
+					<img src="/css/images/arrow_1.png" width="100" height="100"></img>
+				</div>
+			</div>
+			<div class="part" id="uc" onclick="action(0);">
+				<div class="arrow2">
+					<img src="/css/images/arrow_2.png" width="100" height="100"></img>
+				</div>
+			</div>
+			<div class="part" id="ur" onclick="action(91);">
+				<div class="arrow3">
+					<img src="/css/images/arrow_3.png" width="100" height="100"></img>
+				</div>
+			</div>
+		</div>
+		<div class="middlepart">
+			<div class="part" id="ml" onclick="action(4);">
+				<div class="arrow4">
+					<img src="/css/images/arrow_4.png" width="100" height="100"></img>
+				</div>
+			</div>
+			<div class="part" id="mc" onclick="action(1);">
+				<div class="arrow5">
+					<img src="/css/images/arrow_5.png" width="100" height="100"></img>
+				</div>
+			</div>
+			<div class="part" id="mr" onclick="action(6);">
+				<div class="arrow6">
+					<img src="/css/images/arrow_6.png" width="100" height="100"></img>
+				</div>
+			</div>
+		</div>
+		<div class="downpart">
+			<div class="part" id="dl" onclick="action(92);">
+				<div class="arrow7">
+					<img src="/css/images/arrow_7.png" width="100" height="100"></img>
+				</div>
+			</div>
+			<div class="part" id="dc" onclick="action(2);">
+				<div class="arrow8">
+					<img src="/css/images/arrow_8.png" width="100" height="100"></img>
+				</div>
+			</div>
+			<div class="part" id="dr" onclick="action(93);">
+				<div class="arrow9">
+					<img src="/css/images/arrow_9.png" width="100" height="100"></img>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="action_button">
+		<button id="back" onclick="back();">이전</button>
+		<button id="home" onclick="home();">분할선택</button>
+		<button id="next" onclick="next();">다음</button>
+	</div>
+	<div class="main_button">
+		<button class="btn_main" onclick="action(1);location.href = '/main';">MAIN</button>
+		<button class="btn_logout" onclick="logout();">로그아웃</button>
+	</div>
+	<script th:inline="javascript" type="text/javascript">
+        /* <![CDATA[ */
+        var list = /*[[${list}]]*/;
+        /* ]]> */
+        
+        var ip, port, id, pw;
+        var player;
+
+        var count = 0;
+        show(count);
+
+        function back(){
+        	action(1);
+            if(count - 1 >= 0){
+                count = count - 1;
+                player.stop();
+                show(count);
+            }
+        }
+
+        function next(){
+        	action(1);
+            if(count + 1 < list.length){
+                count = count + 1;
+                player.stop();
+                show(count);
+            }
+        }
+
+        function show(i){
+        	 ip = list[i].ip;
+             port = list[i].httpport;
+             id = list[i].camid;
+             pw = list[i].campw;
+             var porting = list[i].port;
+             var ws = "ws://localhost:"+ JSON.stringify(porting) +"/";
+             var canvas = document.getElementById('video');
+             player = new JSMpeg.Player(ws, { canvas: canvas });
+
+             canvas.style.width = '100%';
+             canvas.style.height = '100%';
+        }
+        
+        function action(command){
+            var url = "http://"+ ip +":"+ port +"/decoder_control.cgi?loginuse="+ id +"&loginpas="+ pw +"&command="+ command +"&onestep=0";
+            $.get(url);
+        }
+        
+        function home(){
+        	action(1);
+        	$.ajax({
+        		type: 'POST',
+        		url: '/getID',
+        		success: function(data){
+        			$.ajax({
+        				type: 'GET',
+        				url: 'http://localhost:8088?id=' + data + '&want=0'
+        			});
+        			location.href="/show/select";
+        		}
+        	});
+        }
+        
+        function logout(){
+        	action(1);
+        	$.ajax({
+        		type: 'POST',
+        		url: '/getID',
+        		success: function(data){
+        			$.ajax({
+        				type: 'GET',
+        				url: 'http://localhost:8088?id=' + data + '&want=0'
+        			});
+        			location.href='/logout';
+        		}
+        	});
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>ID/PW 찾기</title>
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+<script src="/js/Login/FindIDPW.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js"></script>
+<link href="css/bootstrap/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" th:href="@{/css/findidpw.css}"></link>
+</head>
+<body>
+   <h1 class="title">Look CAM</h1>
+   <div class="box">
+      <div class="check_find">
+         <input type="radio" class="radio" id="selectid" name="radio"
+            onclick="select_div(1);" checked="checked"><p class="radio_id">  아이디
+            찾기</p><input type="radio" class="radio" id="selectpw" name="radio"
+            onclick="select_div(0);">
+			<p class="radio_pw">비밀번호 변경</p>
+		</div>
+
+		<div class="findID" id="findID">
+         <div>
+            <p class="name">이름　　　</p> <input type="text" id="name" name="name"
+               placeholder="EX> 홍길동">
+         </div>
+
+         <div>
+            <p class="name">휴대전화　</p> <input type="text" onKeyup="inputPhoneNumber(this);" id="phone_1" name="phone"
+               placeholder="EX> 010-0000-0000">
+         </div>
+
+         <div class="clear">
+            <button class="search" id="SearchID" onclick="show_id();">찾기</button>
+            <button class="search1" onclick="location.href='/';">돌아가기</button>
+         </div>
+      </div>
+
+      <div id="findPW" style="display: none;">
+         <div>
+            <p class="name">아이디　　</p> <input type="text" id="id" name="id"
+               placeholder="EX> aaaa">
+         </div>
+
+         <div>
+            <p class="name">휴대전화　</p> <input type="text" onKeyup="inputPhoneNumber(this);" id="phone_2" name="phone"
+               placeholder="EX> 010-0000-0000">
+         </div>
+
+         <div class="clear">
+            <button class="search" id="SearchPW" onclick="show_pw();">변경</button>
+            <button class="search1" onclick="location.href='/';">돌아가기</button>
+         </div>
+      </div>
+
+   </div>
+
+   <dialog id="ID_dialog">
+   <div>
+      <div>
+         <h1>사용자 ID</h1>
+         <h2 id="id_value"></h2>
+      </div>
+      <br>
+      <button onclick="close_id();">닫기</button>
+   </div>
+   </dialog>
+
+   <dialog id="PW_dialog">
+      <div>
+      <label>새로운 비밀번호　</label> <input class="pw1" type="password" id="new_pw"
+         name="new_pw" placeholder="영어+숫자, 5~15자리">
+         </div>
+         <div><label>비밀번호
+         확인　　</label> <input class="pw1" type="password" id="new_pw_re" name="new_pw_re"
+         placeholder="동일하게 입력"></div> <br>
+         <div class="clear">
+      <button class="search" onclick="change_pw();">재설정</button>
+      <button class="search1" onclick="close_pw();">닫기</button>
+      </div>
+   </dialog>
+</body>
+</html>

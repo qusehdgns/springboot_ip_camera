@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<meta charset="UTF-8">
+<title>9분할</title>
+<script type="text/javascript" src="/js/jsmpeg.min.js"></script>
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+<link rel="stylesheet" th:href="@{/css/show_9.css}"></link>
+<link href="css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+	<div class="nine_cam">
+		<table class="cam_nine">
+			<colgroup>
+				<col width="33.3%" />
+				<col width="*%" />
+				<col width="33.3%" />
+			</colgroup>
+			<tr class="height">
+				<td><div class="one" onclick="click_div(0);">
+						<canvas class="ip_stream" id="first"></canvas>
+					</div></td>
+				<td><div class="two" onclick="click_div(1);">
+						<canvas class="ip_stream" id="second"></canvas>
+					</div></td>
+				<td><div class="three" onclick="click_div(2);">
+						<canvas class="ip_stream" id="third"></canvas>
+					</div></td>
+			</tr>
+			<tr class="height">
+				<td><div class="four" onclick="click_div(3);">
+						<canvas class="ip_stream" id="fourth"></canvas>
+					</div></td>
+				<td><div class="five" onclick="click_div(4);">
+						<canvas class="ip_stream" id="fifth"></canvas>
+					</div></td>
+				<td><div class="six" onclick="click_div(5);">
+						<canvas class="ip_stream" id="sixth"></canvas>
+					</div></td>
+			</tr>
+			<tr class="height">
+				<td><div class="seven" onclick="click_div(6);">
+						<canvas class="ip_stream" id="seventh"></canvas>
+					</div></td>
+				<td><div class="eight" onclick="click_div(7);">
+						<canvas class="ip_stream" id="eighth"></canvas>
+					</div></td>
+				<td><div class="nine" onclick="click_div(8);">
+						<canvas class="ip_stream" id="ninth"></canvas>
+					</div></td>
+			</tr>
+		</table>
+	</div>
+
+	<div class="action_button">
+		<button class="back" id="back" onclick="back();">이전</button>
+		<button class="home" id="home" onclick="home();">분할선택</button>
+		<button class="next" id="next" onclick="next();">다음</button>
+	</div>
+
+	<div class="cover" id="cover">
+		<div class="dialog" id="dialog">
+			<canvas class="ipcam_copy" id="copy"></canvas>
+		</div>
+		<div class="control">
+			<div class="uppart">
+				<div class="part" id="ul" onclick="action(90);">
+					<div class="arrow1">
+						<img src="/css/images/arrow_1.png" width="100" height="100"></img>
+					</div>
+				</div>
+				<div class="part" id="uc" onclick="action(0);">
+					<div class="arrow2">
+						<img src="/css/images/arrow_2.png" width="100" height="100"></img>
+					</div>
+				</div>
+				<div class="part" id="ur" onclick="action(91);">
+					<div class="arrow3">
+						<img src="/css/images/arrow_3.png" width="100" height="100"></img>
+					</div>
+				</div>
+			</div>
+			<div class="middlepart">
+				<div class="part" id="ml" onclick="action(4);">
+					<div class="arrow4">
+						<img src="/css/images/arrow_4.png" width="100" height="100"></img>
+					</div>
+				</div>
+				<div class="part" id="mc" onclick="action(1);">
+					<div class="arrow5">
+						<img src="/css/images/arrow_5.png" width="100" height="100"></img>
+					</div>
+				</div>
+				<div class="part" id="mr" onclick="action(6);">
+					<div class="arrow6">
+						<img src="/css/images/arrow_6.png" width="100" height="100"></img>
+					</div>
+				</div>
+			</div>
+			<div class="downpart">
+				<div class="part" id="dl" onclick="action(92);">
+					<div class="arrow7">
+						<img src="/css/images/arrow_7.png" width="100" height="100"></img>
+					</div>
+				</div>
+				<div class="part" id="dc" onclick="action(2);">
+					<div class="arrow8">
+						<img src="/css/images/arrow_8.png" width="100" height="100"></img>
+					</div>
+				</div>
+				<div class="part" id="dr" onclick="action(93);">
+					<div class="arrow9">
+						<img src="/css/images/arrow_9.png" width="100" height="100"></img>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="cover_button">
+			<button class="plus" onclick="cover_plus();">+</button>
+			<button class="minus" onclick="cover_minus();">-</button>
+			<button class="close" onclick="cover_close();">X</button>
+		</div>
+	</div>
+
+	<div class="main_button">
+		<button class="btn_main" onclick="action(1);location.href = '/main';">MAIN</button>
+		<button class="btn_logout" onclick="logout();">로그아웃</button>
+	</div>
+
+	<script th:inline="javascript" type="text/javascript">
+		var plus_count = 0;
+		var cover_num;
+		
+		var screen = new Array();
+		screen.push(document.getElementById("first"));
+		screen.push(document.getElementById("second"));
+		screen.push(document.getElementById("third"));
+		screen.push(document.getElementById("fourth"));
+		screen.push(document.getElementById("fifth"));
+		screen.push(document.getElementById("sixth"));
+		screen.push(document.getElementById("seventh"));
+		screen.push(document.getElementById("eighth"));
+		screen.push(document.getElementById("ninth"));
+		
+		var player = new Array();
+		var copyplayer;
+    	
+		/* <![CDATA[ */
+        var list = /*[[${list}]]*/;
+        /* ]]> */
+        
+        var ip, port, id, pw;
+
+        var count = 0;
+        show(count);
+
+        function back(){
+        	action(1);
+            if(count - 9 >= 0){
+                count = count - 9;
+                for(var x = 0; x < player.length; x++){
+                	player[x].stop();
+                	screen[x].style.width = '0%';
+                }
+                player.splice(0, player.length);
+                show(count);
+            }
+        }
+
+        function next(){
+        	action(1);
+            if(count + 9 < list.length){
+                count = count + 9;
+                for(var x = 0; x < player.length; x++){
+                	player[x].stop();
+                	screen[x].style.width = '0%';
+                }
+                player.splice(0,player.length);
+                show(count);
+            }
+        }
+
+        function stream(i, j){
+        	player.push("");
+            var porting = list[i].port;
+            var ws = "ws://localhost:"+ JSON.stringify(porting) +"/";
+            player[j] = new JSMpeg.Player(ws, { canvas: screen[j] });
+
+            screen[j].style.width = '87%';
+        }
+        
+        function show(i){
+        	for(var j = 0; j < 9 && i < list.length ; j++, i++){
+            	stream(i, j);
+        	}
+        }
+        
+        function home(){
+        	action(1);
+            location.href = "/show/select";
+        }
+        
+        function main(){
+        	action(1);
+        	$.ajax({
+        		type: 'POST',
+        		url: '/getID',
+        		success: function(data){
+        			$.ajax({
+        				type: 'GET',
+        				url: 'http://localhost:8088?id=' + data + '&want=0'
+        			});
+        			location.href="/main";
+        		}
+        	});
+        }
+        
+        function click_div(num) {
+        	if(list[count+num] != undefined){
+        		cover_num = num;
+        		player[cover_num].pause();
+        		$('.action_button').hide();
+        		document.getElementById("cover").style.display = "block";
+            	ip = list[count+num].ip;
+            	port = list[count+num].httpport;
+            	id = list[count+num].camid;
+            	pw = list[count+num].campw;
+            	var porting = list[count+num].port;
+            	var copycanvas = document.getElementById("copy");
+            	var ws = "ws://localhost:"+ JSON.stringify(porting) +"/";
+            	copyplayer = new JSMpeg.Player(ws, { canvas : copycanvas });
+            	
+            	copycanvas.style.width = '100%';
+            	copycanvas.style.height = '100%';
+        	}
+        	
+        	
+        }
+        
+        function cover_close(){
+        	action(1);
+        	player[cover_num].play();
+        	copyplayer.stop();
+        	document.getElementById("cover").style.display = "none";
+        	$('.action_button').show();
+        }
+        
+        function cover_plus(){
+        	if(plus_count == 0){
+				$('.dialog').width('70%');
+            	plus_count++;
+        	} else if(plus_count == 1){
+				$('.dialog').width('90%');
+            	plus_count++;
+        	} else {
+        		alert("더 이상 확대할 수 없습니다.");
+        	}
+        }
+        
+        function cover_minus(){
+        	if(plus_count == 2){
+				$('.dialog').width('70%');
+            	plus_count--;
+        	} else if(plus_count == 1){
+				$('.dialog').width('50%');
+            	plus_count--;
+        	} else {
+        		alert("더 이상 축소할 수 없습니다.");
+        	}
+        }
+        
+        function action(command){
+            var url = "http://"+ ip +":"+ port +"/decoder_control.cgi?loginuse="+ id +"&loginpas="+ pw +"&command="+ command +"&onestep=0";
+            $.get(url);
+        }
+        
+        function logout(){
+        	action(1);
+        	$.ajax({
+        		type: 'POST',
+        		url: '/getID',
+        		success: function(data){
+        			$.ajax({
+        				type: 'GET',
+        				url: 'http://localhost:8088?id=' + data + '&want=0'
+        			});
+        			location.href='/logout';
+        		}
+        	});
+        }
+    </script>
+</body>
+
+</html>

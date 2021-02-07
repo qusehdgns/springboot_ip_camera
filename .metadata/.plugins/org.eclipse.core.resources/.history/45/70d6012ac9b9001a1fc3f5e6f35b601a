@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>ID/PW 찾기</title>
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+<script src="/js/Login/FindIDPW.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js"></script>
+<link href="css/bootstrap/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" th:href="@{/css/findidpw.css}"></link>
+</head>
+<body>
+   <h1 class="title">Look CAM</h1>
+   <div class="box">
+      <div class="check_find">
+         <input type="radio" class="radio" id="selectid" name="radio"
+            onclick="select_div(1);" checked="checked"><p class="radio_id">  아이디
+            찾기</p><input type="radio" class="radio" id="selectpw" name="radio"
+            onclick="select_div(0);">
+			<p class="radio_pw">비밀번호 변경</p>
+		</div>
+
+		<div class="findID" id="findID">
+         <div>
+            <p class="name">이름　　　</p> <input type="text" id="name" name="name"
+               placeholder="EX> 홍길동">
+         </div>
+
+         <div>
+            <p class="name">휴대전화　</p> <input type="text" onKeyup="inputPhoneNumber(this);" id="phone_1" name="phone"
+               placeholder="EX> 010-0000-0000">
+         </div>
+
+         <div class="clear">
+            <button class="search" id="SearchID" onclick="show_id();">찾기</button>
+            <button class="search1" onclick="location.href='/';">돌아가기</button>
+         </div>
+      </div>
+
+      <div id="findPW" style="display: none;">
+         <div>
+            <p class="name">아이디　　</p> <input type="text" id="id" name="id"
+               placeholder="EX> aaaa">
+         </div>
+
+         <div>
+            <p class="name">휴대전화　</p> <input type="text" onKeyup="inputPhoneNumber(this);" id="phone_2" name="phone"
+               placeholder="EX> 010-0000-0000">
+         </div>
+
+         <div class="clear">
+            <button class="search" id="SearchPW" onclick="show_pw();">변경</button>
+            <button class="search1" onclick="location.href='/';">돌아가기</button>
+         </div>
+      </div>
+
+   </div>
+
+   <dialog id="ID_dialog">
+   <div>
+      <div>
+         <h1>사용자 ID</h1>
+         <h2 id="id_value"></h2>
+      </div>
+      <br>
+      <button onclick="close_id();">닫기</button>
+   </div>
+   </dialog>
+
+   <dialog id="PW_dialog">
+      <div>
+      <label>새로운 비밀번호　</label> <input class="pw1" type="password" id="new_pw"
+         name="new_pw" placeholder="영어+숫자, 5~15자리">
+         </div>
+         <div><label>비밀번호
+         확인　　</label> <input class="pw1" type="password" id="new_pw_re" name="new_pw_re"
+         placeholder="동일하게 입력"></div> <br>
+         <div class="clear">
+      <button class="search" onclick="change_pw();">재설정</button>
+      <button class="search1" onclick="close_pw();">닫기</button>
+      </div>
+   </dialog>
+
+
+   <script th:inline="javascript" type="text/javascript">
+   $("#phone_1").on("keyup", function() {
+	    $(this).val($(this).val().replace(/[^0-9,-]/g,""));
+   });
+   
+   $("#phone_2").on("keyup", function() {
+	    $(this).val($(this).val().replace(/[^0-9,-]/g,""));
+	});
+
+	function inputPhoneNumber(obj) {
+		var number = obj.value.replace(/[^0-9]/g, "");
+		var phone = "";
+		
+		if(number.length < 4) {
+			return number;
+		} else if(number.length < 7) {
+			phone += number.substr(0, 3);
+		    phone += "-";
+		    phone += number.substr(3);
+		} else if(number.length < 11) {
+			phone += number.substr(0, 3);
+		    phone += "-";
+		    phone += number.substr(3, 3);
+		    phone += "-";
+		    phone += number.substr(6);
+		} else {
+		    phone += number.substr(0, 3);
+		    phone += "-";
+		    phone += number.substr(3, 4);
+		    phone += "-";
+		    phone += number.substr(7);
+		}
+		obj.value = phone;
+	}
+   
+      function select_div(num) {
+          $("#name").val("");
+          $("#phone_1").val("");
+          $("#id").val("");
+          $("#phone_2").val("");
+         if (num == 1) {
+            document.getElementById("findPW").style.display = "none";
+            document.getElementById("findID").style.display = "";
+         } else {
+            document.getElementById("findPW").style.display = "";
+            document.getElementById("findID").style.display = "none";
+         }
+      }
+
+      function show_id() {
+         var name = $("#name").val();
+         var phone = $("#phone_1").val();
+         if(name == ""){
+        	 alert("이름을 확인해주세요.");
+        	 document.getElementById("name").focus();
+        	 return false;
+         } else if(phone.length != 13) {
+        	 alert("휴대전화를 확인해주세요.");
+        	 document.getElementById("phone_1").focus();
+        	 return false;
+         }
+         var finddata = {
+            name : name,
+            phone : phone
+         }
+         $.ajax({
+            type : 'POST',
+            url : '/join',
+            contentType : 'application/json',
+            data : JSON.stringify(finddata),
+            success : function(data) {
+            	if(data){
+            		if(confirm("해당 사용자가 존재하지 않습니다. 회원가입을 하시겠습니까?")){
+            			location.href="/joinPage";
+            		} else {
+            			$("#name").val("");
+            			$("#phone_1").val("");
+            			document.getElementById("name").focus();
+            			return false;
+            		}
+            	} else {
+            		var lastindex = data.length - 4;
+                    var value = data.substr(0, 4);
+                    for (var i = 0; i < lastindex; i++) {
+                       value = value.concat("*");
+                    }
+                    $("#id_value").text(value);
+                    document.getElementById("ID_dialog").show();
+            	}
+            }
+         });
+      }
+
+      function close_id() {
+         document.getElementById("ID_dialog").close();
+         $("#selectpw").prop("checked", true);
+         select_div(0);
+      }
+
+      function show_pw() {
+         var id = $("#id").val();
+         var phone = $("#phone_2").val();
+         if(id == ""){
+        	 alert("아이디를 확인해주세요.");
+        	 document.getElementById("id").focus();
+        	 return false;
+         } else if(phone.length != 13) {
+        	 alert("휴대전화를 확인해주세요.");
+        	 document.getElementById("phone_1").focus();
+        	 return false;
+         }
+         var finddata = {
+            id : id,
+            phone : phone
+         }
+         $.ajax({
+            type : 'POST',
+            url : '/pwFind',
+            contentType : 'application/json',
+            data : JSON.stringify(finddata),
+            success : function(data) {
+               if (data == 1) {
+                  document.getElementById("PW_dialog").show();
+               } else {
+            	   $("#name").val("");
+            	   $("#phone_2").val("");
+            	   document.getElementById("id").focus();
+            	   alert("해당 사용자가 존재하지 않습니다.\n아이디 및 전화번호를 확인하세요.");
+               }
+            }
+         });
+      }
+
+      function close_pw() {
+         document.getElementById("PW_dialog").close();
+      }
+
+      function change_pw() {
+         var first_pw = $("#new_pw").val();
+         var second_pw = $("#new_pw_re").val();
+         
+ 		var num = first_pw.search(/[0-9]/g);
+ 		var eng = first_pw.search(/[a-z]/ig);
+	
+ 		if(first_pw == ""){
+ 			alert("빈칸이 있습니다.");
+ 			$("#new_pw").focus();
+ 			return false;
+ 		}
+ 		if(second_pw == ""){
+ 			alert("빈칸이 있습니다.");
+ 			$("#new_pw_re").focus();
+ 			return false;
+ 		}
+ 		
+ 		if (first_pw.length < 5 || first_pw.length > 15) {
+ 			alert("5~15자리 이내로 입력해주세요.");
+ 			$("#new_pw").focus();
+ 			return false;
+ 		} else if (first_pw.search(/\s/) != -1) {
+ 			alert("비밀번호는 공백없이 입력해주세요.");
+ 			$("#new_pw").focus();
+ 			return false;
+ 		} else if (num < 0 || eng < 0) {
+ 			alert("영문,숫자를 혼합하여 입력해주세요.");
+ 			$("#new_pw").focus();
+ 			return false;
+ 		}
+         if (first_pw != second_pw) {
+            alert("비밀번호가 같지 않습니다.");
+            $("#new_pw").val("");
+            $("#new_pw_re").val("");
+            return false;
+         }
+         var id = $("#id").val();
+         var hashpw = CryptoJS.MD5(first_pw).toString();
+         $.ajax({
+            type : 'POST',
+            url : '/pwCheck?id=' + id,
+            success : function(data) {
+               if (data == hashpw) {
+                  alert("기존 비밀번호와 같습니다. 새로운 비밀번호를 사용해주세요.");
+                  $("#new_pw").val("");
+                  $("#new_pw_re").val("");
+                  return false;
+               } else {
+                  var data = {
+                     id : id,
+                     pw : hashpw
+                  }
+                  $.ajax({
+                     type : 'POST',
+                     url : '/pwChange',
+                     contentType : 'application/json',
+                     data : JSON.stringify(data),
+                     success : function() {
+                        alert("비밀번호 변경이 완료되었습니다.");
+                        close_pw();
+                        $("#id").val("");
+                        $("#phone_2").val("");
+                     }
+                  });
+               }
+            }
+         });
+      }
+   </script>
+</body>
+</html>
