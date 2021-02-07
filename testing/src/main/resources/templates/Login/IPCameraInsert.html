@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IP 카메라 리스트</title>
+
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
+<link rel="stylesheet" th:href="@{/css/IPCameraInsert.css}"></link>
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+</head>
+
+<style>
+tbody>tr.numList {
+	counter-increment: aaa;
+}
+
+tbody>tr.numList>td:first-child:before {
+	content: counter(aaa) " ";
+	font-size: 20px;
+	margin-right: 30px;
+	margin-left: 30px;
+	margin-top: 10px;
+	text-align: center;
+	color: white;
+}
+</style>
+<body>
+	<p>Look CAM</p>
+	<div class="box">
+
+		<form method="post" name="listForm" id="listForm">
+			<table id="tr">
+				<thead>
+					<tr>
+						<th scope="col">번호</th>
+						<th scope="col">이름</th>
+						<th scope="col">IP</th>
+						<th scope="col">RTSP 포트</th>
+						<th scope="col">HTTP 포트</th>
+						<th scope="col">카메라 ID</th>
+						<th scope="col">카메라 PASSWORD</th>
+						<th scope="col">PORT</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:if="${#lists.size(list)} > 0" th:each="vo : ${list}"
+						class="numList" name="numList">
+						<td></td>
+						<td><input type="text" th:value="${vo.camname}"></td>
+						<td><input type="text" name="ip" th:value="${vo.ip}"></td>
+						<td><input type="text" th:value="${vo.rtspport}"></td>
+						<td><input type="text" th:value="${vo.httpport}"></td>
+						<td><input type="text" th:value="${vo.camid}"></td>
+						<td><input type="password" th:value="${vo.campw}"></td>
+						<td><input type="text" th:value="${vo.port}" readonly></td>
+						<td><button onclick="deleteLine(this);" th:value="${vo.port}">X</button></td>
+					</tr>
+					<tr th:unless="${#lists.size(list)} > 0" class="numList"
+						name="numList">
+						<td></td>
+						<td><input type="text"></td>
+						<td><input type="text"></td>
+						<td><input type="text"></td>
+						<td><input type="text"></td>
+						<td><input type="text"></td>
+						<td><input type="password"></td>
+						<td><input type="hidden" value="0"></td>
+						<td><button onclick="deleteLine(this);" value="0">X</button></td>
+					</tr>
+
+				</tbody>
+			</table>
+		</form>
+		<button class="add" onclick="location.href='/main;'">MAIN</button>
+		<input class="add" type="button" value="추가" id="addList">
+		<input
+				class="add" type="button" value="등록" id="addList1">
+
+	</div>
+	
+	<script th:inline="javascript" type="text/javascript">
+		/* <![CDATA[ */
+    	var list = /*[[${list}]]*/;
+    	/* ]]> */
+    	
+    	var deleteport = new Array();
+    	
+		$('#addList1').click(function() {
+			var sendJson = [];
+			var camname = new Array();
+			var ip = new Array();
+			var rtspport = new Array();
+			var httpport = new Array();
+			var camid = new Array();
+			var campw = new Array();
+			var port = new Array();
+			var text = $('#tr tbody tr td input');
+			var check = false;
+			for(var i = 0; i < text.length - 2; i += 7) {
+				var iptemp = text.eq(i + 1).val();
+				var idx = -1;
+			    var cnt = 0;
+			    do  {
+			    	idx = iptemp.indexOf('.', idx + 1);
+			    	if(idx != -1) {
+				           cnt++;
+				     }   
+			    } while(idx != -1);
+				if(iptemp == ""){
+					alert("IP 입력란이 비어있는지 확인해주세요.");
+					return false;
+				} else if(cnt != 3){
+					alert("IP 입력을 확인해주세요.");
+					return false;
+				} else if(text.eq(i + 2).val() == ""){
+					alert("RTSP 포트 입력란이 비어있는지 확인해주세요.");
+					return false;
+				} else if(text.eq(i + 4).val() == ""){
+					alert("카메라 ID 입력란이 비어있는지 확인해주세요.");
+					return false;
+				} else if(text.eq(i + 5).val() == ""){
+					alert("카메라 PW 입력란이 비어있는지 확인해주세요.");
+					return false;
+				} else if(!(check)){
+					if(text.eq(i).val() == "" || text.eq(i + 3).val() == ""){
+						check = true;
+					}
+				}
+			}
+			if(check && !(confirm("카메라이름 또는 HTTP 포트 입력란이 비어있습니다.\n계속 진행하시겠습니까?\n(HTTP 공백 시 카메라 조종기능[PTZ]을 사용할 수 없습니다.)"))){
+				return false;
+			} else {
+				for (var i = 0; i < text.length - 2; i += 7) {
+					camname.push(text.eq(i).val());
+					ip.push(text.eq(i + 1).val());
+					rtspport.push(text.eq(i + 2).val());
+					httpport.push(text.eq(i + 3).val());
+					camid.push(text.eq(i + 4).val());
+					campw.push(text.eq(i + 5).val());
+					port.push(text.eq(i+6).val());
+				}
+				var checking = false;
+				for(var i = 1; i < camname.length; i ++){
+					for(var j = 0; j < i; j++){
+						if((ip[i] == ip[j] && rtspport[i] == rtspport[j]) || (ip[i] == ip[j] && httpport[i] == httpport[j])){
+							if(confirm("중복되는 카메라가 있습니다.\n계속하시겠습니까?")){
+								checking = true;
+								break;
+							}
+						}
+					}
+					if(checking){
+						break;
+					}
+				}
+				for (var i = 0; i < camname.length; i++) {
+					var ipcameraList = {
+						camname : camname[i],
+						ip : ip[i],
+						rtspport : rtspport[i],
+						httpport : httpport[i],
+						camid : camid[i],
+						campw : campw[i],
+						port : port[i]
+					}
+					sendJson.push(ipcameraList);
+				}
+				if(confirm("정말 수정하시겠습니까?")){
+					if(deleteport.length != 0){
+						$.ajax({
+							url : '/member/deletePort',
+							contentType : 'application/json',
+							data : JSON.stringify(deleteport),
+							dataType : "json",
+							type : "POST"
+						});
+					}
+					$.ajax({
+						url : '/member/IPCameraIn',
+						contentType : 'application/json',
+						data : JSON.stringify(sendJson),
+						dataType : "json",
+						type : "POST"
+					});
+					alert("등록 및 수정이 완료되었습니다");
+					location.href = location.href;
+				} else {
+					location.href = location.href;
+				}
+			}
+		});
+
+		function deleteLine(obj) {
+			var tr = $(obj).parent().parent();
+			if($(obj).val() != 0){
+				var tempport = {
+						port : $(obj).val()
+				}
+				deleteport.push(tempport);
+			}
+			tr.remove();
+		};
+
+		$("#addList").click(function() {
+			var inputline = '<tr class="numList" name="numList">'
+					+ '<td></td>'
+					+ '<td><input type="text"></td>'
+					+ '<td><input type="text"></td>'
+					+ '<td><input type="text"></td>'
+					+ '<td><input type="text"></td>'
+					+ '<td><input type="text"></td>'
+					+ '<td><input type="password"></td>'
+					+ '<td><input type="hidden" value="0"></td>'
+					+ '<td><button onclick="deleteLine(this);" value="0">X</button></td></tr>';
+
+			var position = $("tr[name=numList]:last");
+
+			position.after(inputline);
+		});
+	</script>
+</body>
+
+</html>

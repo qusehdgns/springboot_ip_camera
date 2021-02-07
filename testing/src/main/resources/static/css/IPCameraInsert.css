@@ -1,0 +1,94 @@
+@charset "UTF-8";
+@import url(http://fonts.googleapis.com/earlyaccess/nanumgothic.css);
+@import url(http://cdn.jsdelivr.net/font-nanum/1.0/nanumbarungothic/nanumbarungothic.css);
+body {
+    text-align:center;
+    margin: 0 auto;
+    padding: 0;
+    font-family: sans-serif;
+    background: white;
+}
+
+
+.box {
+    width: 1700px;
+    padding: 40px;
+    position: relative;
+    background: #191919;
+    border-radius: 20px;
+    margin:0 auto;
+}
+
+
+thead tr th{
+    font-size:20px;
+    text-align:center;
+    color:white;
+}
+
+
+
+input[type=text],
+input[type=password]{
+    width:200px;
+    border: 0;
+    background: none;
+    display: block;
+    margin-right:10px;
+    margin-top:10px;
+    text-align: center;
+    border: 2px solid #3498db;
+    padding: 10px 10px;
+    outline: none;
+    color: white;
+    border-radius: 15px;
+    transition: 0.25s;
+    color : white;
+}
+
+
+
+tr td button{
+    background: #cc2e2e;
+    text-align: center;
+    border: #cc2e2e;
+    padding: 5px 10px;
+    color: white;
+    border-radius: 100%;
+    font-size:15px;
+    margin-top:12px;
+    cursor: pointer;
+    
+}
+
+.add{
+   background: none;
+    display: inline;
+    margin: 20px auto;
+    text-align: center;
+    border: 2px solid #2ecc71;
+    padding: 14px 40px;
+    color: white;
+    border-radius: 24px;
+    outline:none;
+    cursor: pointer;
+}
+
+.add:hover{ 
+   background-color:#2ecc71;
+}
+
+.add1:hover{ background-color:#2ecc71;
+}
+
+.btn_main:hover{
+   background-color:white;
+   color:black;
+}
+
+p {
+        color : black;
+        font-size: 100px;
+        font-family: fantasy;
+        margin-top:5%;
+}

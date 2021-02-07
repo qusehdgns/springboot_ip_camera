@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>MAIN</title>
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+<link href="css/bootstrap/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" th:href="@{/css/Home.css}"></link>
+</head>
+<body>
+	<p class="title">Look CAM</p>
+	<div class="box">
+		<button class="btn-1" type="button"
+			onclick="stop_stream();">등록/수정</button>
+		<div id="lookcamera"><button class="btn-1" type="button" onclick="stream();">보기</button></div>
+		<button class="btn_logout" type="button"
+			onclick="logout();">로그아웃</button>
+
+	</div>
+
+
+	<script>
+$(document).ready(function(){
+	$.ajax({ 
+		type: 'POST', 
+		url: '/cameraCheck', 
+		success: function (data) { 
+			if (data == 0) { 
+				$("#lookcamera").hide();
+			} 
+		}
+	}); 
+});
+
+function logout(){
+	$.ajax({
+		type: 'POST',
+		url: '/getID',
+		success: function(data){
+			$.ajax({
+				type: 'GET',
+				url: 'http://localhost:8088?id=' + data + '&want=0'
+			});
+			location.href='/logout';
+		}
+	});
+}
+
+function stream(){
+	$.ajax({
+		type: 'POST',
+		url: '/getID',
+		success: function(data){
+			$.ajax({
+				type: 'GET',
+				url: 'http://localhost:8088?id=' + data + '&want=1'
+			});
+			location.href='/show/select';
+		}
+	});
+}
+
+function stop_stream(){
+	$.ajax({
+		type: 'POST',
+		url: '/getID',
+		success: function(data){
+			$.ajax({
+				type: 'GET',
+				url: 'http://localhost:8088?id=' + data + '&want=0'
+			});
+			location.href='/member/IPCameraInsert';
+		}
+	});
+}
+</script>
+</body>
+</html>

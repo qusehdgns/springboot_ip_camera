@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="inhatc.testing.capstone.Login.dto.LoginDAO">
+
+	<select id="userLogin" resultType="String">
+		SELECT * FROM USERLIST
+		WHERE id=#{id} and pw=#{pw}
+	</select>
+	
+	<insert id="userJoin" parameterType="inhatc.testing.capstone.Login.dto.LoginDto">
+		INSERT INTO USERLIST (id, pw, name, phone)
+		VALUES (#{id}, #{pw}, #{name}, #{phone})
+	</insert>
+	
+	<select id="idCheck" resultType="int">
+		SELECT count(*) from USERLIST
+		WHERE id=#{id}
+	</select>
+	
+	<select id="cameraCheck" resultType="int">
+		SELECT count(*) FROM ACCESS_IP
+		WHERE userid = #{id}
+	</select>
+	
+	<delete id="deleteCamera" parameterType="String">
+		DELETE FROM ACCESS_IP where userid = #{id}
+	</delete>
+	
+	<delete id="deletePort" parameterType="int">
+		DELETE FROM UNUSEPORT WHERE UNPORT = #{port}
+	</delete>
+	
+	<insert id="UsingPort" parameterType="int">
+		INSERT INTO unuseport values(#{port}) 
+	</insert>
+	
+	<insert id="IPCameraInsert" parameterType="inhatc.testing.capstone.Login.dto.IPCameraList">
+       INSERT INTO ACCESS_IP(userid, camname, ip, rtspport, httpport, camid, campw, port)
+       VALUES (#{userid}, #{camname}, #{ip}, #{rtspport}, #{httpport}, #{camid}, #{campw}, #{port})
+ 	</insert>
+
+	<select id="ipCameraList"
+		parameterType="inhatc.testing.capstone.Login.dto.IPCameraList"
+		resultType="inhatc.testing.capstone.Login.dto.IPCameraList">
+		SELECT * FROM ACCESS_IP
+		<if test="userid!=null and userid!=''">
+			WHERE userid = #{userid}
+		</if>
+	</select>
+	
+	<select id ="portCheck" resultType="int">
+		SELECT makeport FROM dual
+	</select>
+	
+	<select id="idFind" parameterType="inhatc.testing.capstone.Login.dto.LoginDto" resultType="String">
+		SELECT id FROM USERLIST WHERE name LIKE #{name} AND phone LIKE #{phone}
+	</select>
+	
+	<select id="pwFind" parameterType="inhatc.testing.capstone.Login.dto.LoginDto" resultType="int">
+		SELECT count(*) FROM USERLIST WHERE id LIKE #{id} AND phone LIKE #{phone}
+	</select>
+	
+	<update id="pwChange" parameterType="inhatc.testing.capstone.Login.dto.LoginDto">
+		UPDATE USERLIST SET pw = #{pw} WHERE id like #{id}
+	</update>
+	
+	<select id="pwCheck" resultType="String">
+		SELECT pw FROM USERLIST WHERE id LIKE #{id}
+	</select>
+</mapper>
